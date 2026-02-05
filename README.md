@@ -1,0 +1,1 @@
+# b2c-hsc-native-auth-configuration
