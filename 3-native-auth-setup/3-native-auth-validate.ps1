@@ -210,6 +210,6 @@ if ($checks.Fail -gt 0) {
 
     Write-Host "  RESULT: All checks passed. Ready to test Native Auth flows." -ForegroundColor Green
     Write-Host ""
-    Write-Host "Next step — test sign-up (passwordless):" -ForegroundColor Cyan
-    Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Username `"user@example.com`"" -ForegroundColor White
+    Write-Host "Next step — test sign-up:" -ForegroundColor Cyan
+    Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Email `"user@example.com`"" -ForegroundColor White
 }

@@ -7,8 +7,7 @@
     
 .DESCRIPTION
     Complete sign-in flow for Microsoft Entra External ID Native Authentication.
-    Supports password and OTP-based authentication.
-    Demonstrates proper continuation token handling.
+    Uses Email OTP for authentication.
     
 .PARAMETER TenantName
     Your B2C/External ID tenant subdomain (e.g., "contosob2c")
@@ -16,20 +15,11 @@
 .PARAMETER ClientId
     Application (client) ID with native authentication enabled
     
-.PARAMETER Username
-    Email address or username for authentication
-    
-.PARAMETER Password
-    User password for authentication
-    
-.PARAMETER UseOTP
-    Use OTP instead of password for authentication
+.PARAMETER Email
+    Email address for authentication
     
 .EXAMPLE
-    .\native-auth-signin.ps1 -TenantName "contosob2c" -ClientId "12345678-1234-1234-1234-123456789012" -Username "user@example.com" -Password "SecureP@ss123!"
-    
-.EXAMPLE
-    .\native-auth-signin.ps1 -TenantName "contosob2c" -ClientId "12345678-1234-1234-1234-123456789012" -Username "user@example.com" -UseOTP
+    .\native-auth-signin.ps1 -TenantName "contosob2c" -ClientId "12345678-1234-1234-1234-123456789012" -Email "user@example.com"
     
 .NOTES
     Requirements:
@@ -44,21 +34,13 @@ param(
     [string]$ClientId   = $env:HSC_NATIVE_APP_ID,
 
     [Parameter(Mandatory=$true)]
-    [string]$Username,
-
-    [string]$Password,
-    [switch]$UseOTP
+    [string]$Email
 )
 
 if (-not $TenantName -or -not $ClientId) {
     Write-Host "ERROR: TenantName and ClientId are required." -ForegroundColor Red
     Write-Host "  Pass them as parameters or run register-app first (sets env vars automatically)." -ForegroundColor Yellow
     exit 1
-}
-
-# Validate parameters
-if (-not $UseOTP -and -not $Password) {
-    throw "Either -Password or -UseOTP must be specified"
 }
 
 # Import shared helpers
@@ -77,8 +59,8 @@ try {
     
     $initiateBody = @{
         client_id = $ClientId
-        username = $Username
-        challenge_type = "oob password redirect"
+        username = $Email
+        challenge_type = "oob redirect"
     }
     
     $initiateResponse = Invoke-RestMethod -Method Post `
@@ -93,76 +75,43 @@ try {
     }
     
     Write-Host "✓ Sign-in initiated successfully" -ForegroundColor Green
-    Write-Host "  User found: $Username`n" -ForegroundColor Gray
+    Write-Host "  User found: $Email`n" -ForegroundColor Gray
     
-    # Step 2: Challenge (Password or OTP)
-    if ($UseOTP) {
-        Write-Host "[Step 2/3] Requesting OTP..." -ForegroundColor Yellow
-        
-        $challengeBody = @{
-            client_id = $ClientId
-            continuation_token = $continuationToken
-            challenge_type = "oob redirect"
-        }
-        
-        $challengeResponse = Invoke-RestMethod -Method Post `
-            -Uri "$BaseUrl/oauth2/v2.0/challenge" `
-            -ContentType "application/x-www-form-urlencoded" `
-            -Body $challengeBody
-        
-        $continuationToken = $challengeResponse.continuation_token
-        
-        if ($challengeResponse.challenge_target_label) {
-            Write-Host "✓ OTP sent to: $($challengeResponse.challenge_target_label)" -ForegroundColor Green
-        } else {
-            Write-Host "✓ OTP sent successfully" -ForegroundColor Green
-        }
-        
-        # Prompt for OTP
-        Write-Host "`nPlease check your email for the OTP code." -ForegroundColor Cyan
-        $otpCode = Read-Host "Enter the OTP code received"
-        
-        # For OTP sign-in, submit OTP at token endpoint with grant_type=oob
-        Write-Host "`n[Step 3/3] Submitting OTP and requesting tokens..." -ForegroundColor Yellow
-        
-        $tokenBody = @{
-            client_id = $ClientId
-            continuation_token = $continuationToken
-            grant_type = "oob"
-            oob = $otpCode
-            scope = "openid profile offline_access"
-        }
-        
+    # Step 2: Request OTP
+    Write-Host "[Step 2/3] Requesting OTP..." -ForegroundColor Yellow
+    
+    $challengeBody = @{
+        client_id = $ClientId
+        continuation_token = $continuationToken
+        challenge_type = "oob redirect"
+    }
+    
+    $challengeResponse = Invoke-RestMethod -Method Post `
+        -Uri "$BaseUrl/oauth2/v2.0/challenge" `
+        -ContentType "application/x-www-form-urlencoded" `
+        -Body $challengeBody
+    
+    $continuationToken = $challengeResponse.continuation_token
+    
+    if ($challengeResponse.challenge_target_label) {
+        Write-Host "✓ OTP sent to: $($challengeResponse.challenge_target_label)" -ForegroundColor Green
     } else {
-        # Password flow: /challenge only requests the challenge type.
-        # The actual password is submitted at /token with grant_type=password.
-        Write-Host "[Step 2/3] Requesting password challenge..." -ForegroundColor Yellow
-        
-        $challengeBody = @{
-            client_id = $ClientId
-            continuation_token = $continuationToken
-            challenge_type = "password redirect"
-        }
-        
-        $challengeResponse = Invoke-RestMethod -Method Post `
-            -Uri "$BaseUrl/oauth2/v2.0/challenge" `
-            -ContentType "application/x-www-form-urlencoded" `
-            -Body $challengeBody
-        
-        $continuationToken = $challengeResponse.continuation_token
-        
-        Write-Host "✓ Password challenge accepted`n" -ForegroundColor Green
-        
-        # Step 3: Submit password at /token endpoint
-        Write-Host "[Step 3/3] Submitting password and requesting tokens..." -ForegroundColor Yellow
-        
-        $tokenBody = @{
-            client_id = $ClientId
-            continuation_token = $continuationToken
-            grant_type = "password"
-            password = $Password
-            scope = "openid profile offline_access"
-        }
+        Write-Host "✓ OTP sent successfully" -ForegroundColor Green
+    }
+    
+    # Prompt for OTP
+    Write-Host "`nPlease check your email for the OTP code." -ForegroundColor Cyan
+    $otpCode = Read-Host "Enter the OTP code received"
+    
+    # Submit OTP at token endpoint with grant_type=oob
+    Write-Host "`n[Step 3/3] Submitting OTP and requesting tokens..." -ForegroundColor Yellow
+    
+    $tokenBody = @{
+        client_id = $ClientId
+        continuation_token = $continuationToken
+        grant_type = "oob"
+        oob = $otpCode
+        scope = "openid profile offline_access"
     }
     
     $tokenResponse = Invoke-RestMethod -Method Post `

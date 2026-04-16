@@ -12,7 +12,7 @@ This repository is the companion to the official Microsoft documentation for ena
 | 2 | **Enable HSC mode** — Validate tenant readiness, enable High Scale Compatibility, and turn on Email OTP |
 | 3 | **Configure Native Authentication** — Register your app, create a user flow, and link them together |
 | 4 | **Validate** — Verify everything is correctly configured before going live |
-| 5 | **Test the flows** — Sign up new users, sign in, and reset passwords using Native Auth APIs |
+| 5 | **Test the flows** — Sign up new users and sign in using Native Auth APIs |
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ This repository is the companion to the official Microsoft documentation for ena
 .\run-all.ps1 -TenantId "<TENANT_ID>"
 
 # Or include a sign-up test at the end
-.\run-all.ps1 -TenantId "<TENANT_ID>" -TestUsername "user@example.com"
+.\run-all.ps1 -TenantId "<TENANT_ID>" -TestEmail "user@example.com"
 ```
 
 ### Option B: Step by Step
@@ -70,22 +70,14 @@ This sets `HSC_NATIVE_APP_ID` and `HSC_TENANT_NAME` for the session.
 #### Step 5: Test Native Auth Flows
 
 ```powershell
-# Sign up (passwordless)
-.\4-native-auth-flows\1-native-auth-signup.ps1 -Username "user@example.com"
+# Sign up
+.\4-native-auth-flows\1-native-auth-signup.ps1 -Email "user@example.com"
 
-# Sign in (OTP)
-.\4-native-auth-flows\2-native-auth-signin.ps1 -Username "user@example.com" -UseOTP
-
-# Sign in (password)
-.\4-native-auth-flows\2-native-auth-signin.ps1 -Username "user@example.com" -Password "SecurePass123!"
-
-# Password reset (interactive)
-.\4-native-auth-flows\3-native-auth-password-reset.ps1 -Username "user@example.com"
+# Sign in
+.\4-native-auth-flows\2-native-auth-signin.ps1 -Email "user@example.com"
 ```
 
 > **Tip:** All parameters can still be passed explicitly if needed (e.g., `-TenantId`). The env vars are just a convenience.
->
-> **Note:** SSPR must be enabled in the tenant for password reset. Verify in the Entra admin center under **Authentication methods** > **Password reset**.
 
 ## Repository Structure
 
@@ -114,10 +106,9 @@ common/                         # Shared PowerShell helpers
 │   3-native-auth-validate.ps1
 │   README.md
 │
-4-native-auth-flows/            # Step 5: Sign-up, sign-in, password reset
+4-native-auth-flows/            # Step 5: Sign-up, sign-in
 │   1-native-auth-signup.ps1
 │   2-native-auth-signin.ps1
-│   3-native-auth-password-reset.ps1
 │   README.md
 │
 .github/
@@ -142,7 +133,7 @@ This repo includes built-in GitHub Copilot support. When you open the repo in VS
 | `setup-all` | Run the full end-to-end setup |
 | `enable-hsc` | Enable HSC mode (Steps 1-2) |
 | `configure-native-auth` | Register app + create flow (Steps 3-4) |
-| `test-native-auth` | Test sign-up, sign-in, password reset |
+| `test-native-auth` | Test sign-up and sign-in flows |
 | `troubleshoot` | Diagnose common errors |
 
 

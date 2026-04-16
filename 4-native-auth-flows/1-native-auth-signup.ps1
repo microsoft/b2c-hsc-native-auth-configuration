@@ -6,10 +6,8 @@
     Native Authentication Sign-up Flow
     
 .DESCRIPTION
-    Complete sign-up flow for Microsoft Entra External ID Native Authentication.
-    Supports two modes:
-    - Email + Password: Provide -Password parameter for password-based auth with OTP verification
-    - Passwordless (Email OTP only): Omit -Password parameter for OTP-only authentication
+    Complete passwordless sign-up flow for Microsoft Entra External ID Native Authentication.
+    Uses Email OTP for identity verification.
     
 .PARAMETER TenantName
     Your B2C/External ID tenant subdomain (e.g., "contosob2c")
@@ -17,29 +15,20 @@
 .PARAMETER ClientId
     Application (client) ID with native authentication enabled
     
-.PARAMETER Username
-    Email address or custom identifier for new user
-    
-.PARAMETER Password
-    Optional. Password for the new account. If omitted, uses passwordless (OTP only) flow.
+.PARAMETER Email
+    Email address for the new user
     
 .PARAMETER DisplayName
     Optional display name for the user
     
 .EXAMPLE
-    # Email + Password mode
-    .\native-auth-signup.ps1 -TenantName "contosob2c" -ClientId "12345..." -Username "user@example.com" -Password "SecureP@ss123!"
-    
-.EXAMPLE
-    # Passwordless mode (OTP only)
-    .\native-auth-signup.ps1 -TenantName "contosob2c" -ClientId "12345..." -Username "user@example.com"
+    .\native-auth-signup.ps1 -TenantName "contosob2c" -ClientId "12345..." -Email "user@example.com"
     
 .NOTES
     Requirements:
     - PowerShell 5.1 or later (PowerShell 7+ recommended)
     - Application must have native authentication enabled
     - User flow must be configured and linked to the application
-    - SSPR must be enabled for password reset scenarios
 #>
 
 param(
@@ -47,9 +36,8 @@ param(
     [string]$ClientId   = $env:HSC_NATIVE_APP_ID,
 
     [Parameter(Mandatory=$true)]
-    [string]$Username,
+    [string]$Email,
 
-    [string]$Password = "",
     [string]$DisplayName = ""
 )
 
@@ -69,12 +57,7 @@ Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "Native Authentication - Sign-up Flow" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
-$isPasswordless = [string]::IsNullOrEmpty($Password)
-if ($isPasswordless) {
-    Write-Host "Mode: Passwordless (Email OTP only)" -ForegroundColor Magenta
-} else {
-    Write-Host "Mode: Email + Password" -ForegroundColor Magenta
-}
+Write-Host "Mode: Passwordless (Email OTP)" -ForegroundColor Magenta
 Write-Host ""
 
 try {
@@ -83,12 +66,8 @@ try {
     
     $startBody = @{
         client_id = $ClientId
-        username = $Username
-        challenge_type = "oob password redirect"
-    }
-    
-    if (-not $isPasswordless) {
-        $startBody.password = $Password
+        username = $Email
+        challenge_type = "oob redirect"
     }
     
     if ($DisplayName) {

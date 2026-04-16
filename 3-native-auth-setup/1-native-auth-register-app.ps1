@@ -347,6 +347,6 @@ if (-not $CreateFlow) {
     Write-Host "  .\3-native-auth-setup\3-native-auth-validate.ps1" -ForegroundColor White
     Write-Host ""
     Write-Host "Then test sign-up:" -ForegroundColor Cyan
-    Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Username `"user@example.com`"" -ForegroundColor White
+    Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Email `"user@example.com`"" -ForegroundColor White
 }
 Write-Host ""

@@ -17,7 +17,6 @@ Help the user diagnose and fix errors with HSC mode or Native Authentication.
 | `HybridUpgradeNotAllowed` | Tenant not allow-listed for HSC | Contact Microsoft Support with parent tenant ID |
 | `NoResourceProviderDataFound` | No Azure subscription linked | Link subscription in Azure portal → B2C Settings |
 | `user_not_found` | User doesn't exist for sign-in | Sign up first with `1-native-auth-signup.ps1` |
-| `invalid_grant` + password | Password doesn't meet policy | Check complexity: 8+ chars, upper, lower, digit, special |
 | `consent_required` on signup | Admin consent not granted | Re-run `.\3-native-auth-setup\1-native-auth-register-app.ps1` |
 
 3. If the error doesn't match, help the user:

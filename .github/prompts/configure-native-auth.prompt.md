@@ -22,6 +22,6 @@ Set up a Native Authentication app registration and user flow on the user's B2C 
    ```
 4. If all 4 checks pass, tell the user they can now test sign-up:
    ```
-   .\4-native-auth-flows\1-native-auth-signup.ps1 -Username "user@example.com"
+   .\4-native-auth-flows\1-native-auth-signup.ps1 -Email "user@example.com"
    ```
 5. If any check fails, read the error and consult `.github/copilot-instructions.md` for fixes.

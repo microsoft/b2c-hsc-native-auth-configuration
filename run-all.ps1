@@ -27,8 +27,8 @@
 .PARAMETER FlowName
     Display name for the user flow (default: "Native Auth Flow").
 
-.PARAMETER TestUsername
-    If provided, runs a passwordless sign-up test at the end.
+.PARAMETER TestEmail
+    If provided, runs a sign-up test at the end.
 
 .PARAMETER SkipAdminSetup
     Skip Step 1 if you already have env vars set (HSC_TENANT_ID, HSC_ACCESS_TOKEN, HSC_REFRESH_TOKEN).
@@ -37,18 +37,18 @@
     .\run-all.ps1 -TenantId "your-tenant-id"
 
 .EXAMPLE
-    .\run-all.ps1 -TenantId "your-tenant-id" -TestUsername "user@example.com"
+    .\run-all.ps1 -TenantId "your-tenant-id" -TestEmail "user@example.com"
 
 .EXAMPLE
     # Resume from step 2 (env vars already set)
-    .\run-all.ps1 -SkipAdminSetup -TestUsername "user@example.com"
+    .\run-all.ps1 -SkipAdminSetup -TestEmail "user@example.com"
 #>
 
 param(
     [string]$TenantId           = $env:HSC_TENANT_ID,
     [string]$NativeAuthAppName  = "NativeAuthApp",
     [string]$FlowName           = "Native Auth Flow",
-    [string]$TestUsername,
+    [string]$TestEmail,
     [switch]$SkipAdminSetup
 )
 
@@ -107,11 +107,11 @@ Write-Step "6/6" "Validate Setup"
 Invoke-Step "Step 6" { & "$PSScriptRoot\3-native-auth-setup\3-native-auth-validate.ps1" }
 
 # ── Optional: Test Sign-up ──────────────────────────────────────────────
-if ($TestUsername) {
+if ($TestEmail) {
     Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Green
     Write-Host "║  BONUS — Test Sign-up" -ForegroundColor Green
     Write-Host "╚══════════════════════════════════════════╝`n" -ForegroundColor Green
-    & "$PSScriptRoot\4-native-auth-flows\1-native-auth-signup.ps1" -Username $TestUsername
+    & "$PSScriptRoot\4-native-auth-flows\1-native-auth-signup.ps1" -Email $TestEmail
 }
 
 Write-Host "`n============================================" -ForegroundColor Green
@@ -124,7 +124,7 @@ Write-Host "  HSC_TENANT_NAME   = $env:HSC_TENANT_NAME" -ForegroundColor Gray
 Write-Host "  HSC_NATIVE_APP_ID = $env:HSC_NATIVE_APP_ID" -ForegroundColor Gray
 Write-Host ""
 Write-Host "You can now run any script without parameters:" -ForegroundColor White
-Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Username `"user@example.com`"" -ForegroundColor White
-Write-Host "  .\4-native-auth-flows\2-native-auth-signin.ps1 -Username `"user@example.com`" -UseOTP" -ForegroundColor White
+Write-Host "  .\4-native-auth-flows\1-native-auth-signup.ps1 -Email `"user@example.com`"" -ForegroundColor White
+Write-Host "  .\4-native-auth-flows\2-native-auth-signin.ps1 -Email `"user@example.com`"" -ForegroundColor White
 Write-Host "  .\2-hsc-setup\4-hsc-check-status.ps1" -ForegroundColor White
 Write-Host ""

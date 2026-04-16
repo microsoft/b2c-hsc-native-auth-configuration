@@ -14,9 +14,8 @@ This repo automates enabling **HSC (High Scale Compatibility) mode** on Azure AD
 - `3-native-auth-setup/1-native-auth-register-app.ps1` — Register native auth app + SP + flow
 - `3-native-auth-setup/2-native-auth-create-flow.ps1` — Create user flow separately
 - `3-native-auth-setup/3-native-auth-validate.ps1` — Validate full setup (4 checks)
-- `4-native-auth-flows/1-native-auth-signup.ps1` — Sign-up (passwordless or with password)
-- `4-native-auth-flows/2-native-auth-signin.ps1` — Sign-in (OTP or password)
-- `4-native-auth-flows/3-native-auth-password-reset.ps1` — SSPR password reset
+- `4-native-auth-flows/1-native-auth-signup.ps1` — Sign-up (Email OTP)
+- `4-native-auth-flows/2-native-auth-signin.ps1` — Sign-in (Email OTP)
 
 ## Environment Variables
 
@@ -38,7 +37,7 @@ Scripts propagate credentials automatically via env vars — no need to repeat p
 4. `.\2-hsc-setup\3-hsc-enable-email-otp.ps1`
 5. `.\3-native-auth-setup\1-native-auth-register-app.ps1 -AppName "NativeAuthApp" -CreateFlow`
 6. `.\3-native-auth-setup\3-native-auth-validate.ps1`
-7. `.\4-native-auth-flows\1-native-auth-signup.ps1 -Username "user@example.com"`
+7. `.\4-native-auth-flows\1-native-auth-signup.ps1 -Email "user@example.com"`
 
 Or one-shot: `.\run-all.ps1 -TenantId "<TENANT_ID>"`
 
